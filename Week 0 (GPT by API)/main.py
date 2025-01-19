@@ -17,16 +17,47 @@ CONFIG_PATH = "config.json"
 # Options for modifiying text in the console, concatonate with the text
 # Not in use, can be added later
 class textFeatures:
-   PURPLE = '\033[95m'
-   CYAN = '\033[96m'
-   DARKCYAN = '\033[36m'
-   BLUE = '\033[94m'
-   GREEN = '\033[92m'
-   YELLOW = '\033[93m'
-   RED = '\033[91m'
-   BOLD = '\033[1m'
-   UNDERLINE = '\033[4m'
-   END = '\033[0m'
+    PURPLE = '\033[95m'
+    CYAN = '\033[96m'
+    DARKCYAN = '\033[36m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
+
+    # Codes used by assistant mapped to the text feature
+    codeMap = {
+        "**": BOLD,
+        "__": UNDERLINE
+    }
+
+    # For now this is just for 2 character format codes, will change if needed
+    def formatText(text: str, previousFormatters: list):
+        newString = []
+
+        pointer = 0
+
+        while pointer < len(text):
+            if text[pointer:pointer + 2] in textFeatures.codeMap.keys():
+                for key in textFeatures.codeMap.keys():
+                    if text[pointer:pointer + 2] == key:
+                        if key in previousFormatters:
+                            newString.append(textFeatures.END)
+                            previousFormatters.remove(key)
+                            pointer += len(key)
+                        else:
+                            newString.append(textFeatures.codeMap[key])
+                            previousFormatters.append(key)
+                            pointer += len(key)
+            else:
+                newString.append(text[pointer])
+                pointer += 1
+
+        return ''.join(newString)
+
 
 # Currently just a few functions, designed to expand for other parameters and operations
 class configOps:
@@ -58,7 +89,7 @@ class OpenAIRequests:
     GPT_4O_MINI = "gpt-4o-mini"
 
     # Setup for formating messages
-    DEVMESSAGE = "Please only use CLI friendly formatting, avoid LaTeX and other special formatting systems."
+    DEVMESSAGE = "Please only use CLI friendly formatting, avoid LaTeX and other special formatting systems. To bold text use **, to underline it use __."
 
     # Makes a request to the given model
     # Returns the response
@@ -71,14 +102,21 @@ class OpenAIRequests:
 
         response = ""
 
+        # Previously seen formating keys
+        formatters = []
+
         for chuck in stream:
             if chuck.choices[0].delta.content != None:
-                    print(chuck.choices[0].delta.content, end="")
-                    response += chuck.choices[0].delta.content
+                    delta = chuck.choices[0].delta.content
+
+                    delta = textFeatures.formatText(delta, formatters)
+
+                    print(delta, end="")
+                    response += delta
 
         return response
 
-# Quick function for prompting yes/no
+# Quick helper function for prompting yes/no
 # Return bool true for yes, false for no
 def yesNo(question: str):
     choice = input(question + " (y/n): ").capitalize()
@@ -107,11 +145,10 @@ if __name__ == "__main__":
                     pass
 
                 case "user":
-                    print("You: ", message["content"])
+                    print("You: ", textFeatures.formatText(message["content"], []))
                 
                 case "assistant":
-                    print("AI: ", message["content"])
-
+                    print("AI: ", textFeatures.formatText(message["content"], []))
     else:
         chatLog = []
 
