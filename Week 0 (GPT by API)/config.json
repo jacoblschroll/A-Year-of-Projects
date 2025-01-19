@@ -1,1 +1,1 @@
-{"config": {"API_KEY": "", "Previous Conversation": [{"role": "developer", "content": "Please only use CLI friendly formatting, avoid LaTeX and other special formatting systems."}]}}
+{"API_KEY": "", "DEV_MESSAGE": "Please only use CLI friendly formatting, avoid LaTeX and other special formatting systems. To bold text use **, to underline it use __.", "MODEL": "gpt-4o-mini", "CONVERSATION": []}

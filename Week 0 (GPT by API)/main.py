@@ -1,16 +1,9 @@
 from openai import OpenAI
 import json
 
-"""
-I kept the config file simple
-The default config.json stores your API key and past conversations
 
-main.py also has a few constants that can be changed like the developer message
-and the model being used for responses
-
-I've also included textFeatures in case I want to add some sort of formatting
-later on
-"""
+# I kept the config file simple
+# The default config.json stores your API key, developer message, and previous conversation
 
 CONFIG_PATH = "config.json"
 
@@ -34,7 +27,7 @@ class textFeatures:
         "__": UNDERLINE
     }
 
-    # For now this is just for 2 character format codes, will change if needed
+    # This whole function is kind of crude but it works, could likley be made better though
     def formatText(text: str, previousFormatters: list):
         newString = []
 
@@ -59,15 +52,15 @@ class textFeatures:
         return ''.join(newString)
 
 
-# Currently just a few functions, designed to expand for other parameters and operations
 class config:
     def __init__(self):
         self.path = ""
         self.API_KEY = ""
-        self.conversation = []
+        self.DEV_MESSAGE = ""
+        self.MODEL = ""
+        self.CONVERSATION = []
 
     # Load the config file's data
-    # Return the API key and previous conversation
     def loadConfig(self, path: str):
         self.path = path
 
@@ -75,30 +68,24 @@ class config:
             config_data = json.load(config)
 
         config.close()
-        
-        # Returns the API key and chat log
-        self.API_KEY = config_data["config"]["API_KEY"]
-        self.conversation = [message for message in config_data["config"]["Previous Conversation"]]
+    
+        # Sets the api key, developer message, and model
+        self.API_KEY = config_data["API_KEY"]
+        self.DEV_MESSAGE = config_data["DEV_MESSAGE"]
+        self.MODEL = config_data["MODEL"]
+        self.CONVERSATION = config_data["CONVERSATION"]
 
     # Updates the config file with the sessions messages
     # Takes the API key, chat log, path to the config, and if the function has been called
     def saveConversation(self, chat_log):
         with open(self.path, 'r+') as config:
             data = json.load(config)
-            data["config"]["API_KEY"] = self.API_KEY
-            data["config"]["Previous Conversation"] = chat_log
+            data["CONVERSATION"] = chat_log
             config.seek(0)
             json.dump(data, config)
             config.truncate()
 
 class OpenAIRequests:
-    # For simplicity, there's just two models to choose from
-    GPT_4O = "gpt-4o"
-    GPT_4O_MINI = "gpt-4o-mini"
-
-    # Setup for formating messages
-    DEVMESSAGE = "Please only use CLI friendly formatting, avoid LaTeX and other special formatting systems. To bold text use **, to underline it use __."
-
     # Makes a request to the given model
     # Returns the response
     def makeChatRequest(modelSelection: str, message: str):
@@ -129,8 +116,8 @@ class OpenAIRequests:
 def yesNo(question: str):
     choice = input(question + " (y/n): ").capitalize()
 
-    if choice != "Y" or choice != "N":
-        return choice.capitalize() == "Y"
+    if choice == "Y" or choice == "N":
+        return choice == "Y"
     else:
         yesNo(question)
 
@@ -139,9 +126,7 @@ if __name__ == "__main__":
 
     myConfig.loadConfig(CONFIG_PATH)
 
-    API_KEY, chatLog = myConfig.API_KEY, myConfig.conversation
-
-    print(API_KEY)
+    API_KEY, chatLog = myConfig.API_KEY, myConfig.CONVERSATION
 
     if (API_KEY == None or API_KEY == ""):
         raise Exception("Missing API Key")
@@ -173,15 +158,15 @@ if __name__ == "__main__":
         if (message != '/end'):
             chatLog.append({"role": "user", "content": message})
 
-            response = OpenAIRequests.makeChatRequest(OpenAIRequests.GPT_4O_MINI, chatLog)
+            response = OpenAIRequests.makeChatRequest(myConfig.MODEL, chatLog)
 
             # This is here to keep formatting working
             if response[-1] != '\n':
                 print("\n", end="")
 
             chatLog.append({"role": "assistant", "content": response})
-    
+
     if yesNo("Would you like to save this conversation?"):
         myConfig.saveConversation(chatLog)
     else:
-        myConfig.saveConversation([{"role":"developer", "content": OpenAIRequests.DEVMESSAGE}])
+        myConfig.saveConversation([{"role":"developer", "content": myConfig.DEV_MESSAGE}])
