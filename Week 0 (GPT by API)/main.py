@@ -60,24 +60,32 @@ class textFeatures:
 
 
 # Currently just a few functions, designed to expand for other parameters and operations
-class configOps:
+class config:
+    def __init__(self):
+        self.path = ""
+        self.API_KEY = ""
+        self.conversation = []
+
     # Load the config file's data
     # Return the API key and previous conversation
-    def loadConfig(path: str):
+    def loadConfig(self, path: str):
+        self.path = path
+
         with open(path, 'r') as config:
             config_data = json.load(config)
 
         config.close()
         
         # Returns the API key and chat log
-        return config_data["config"]["API_KEY"], [message for message in config_data["config"]["Previous Conversation"]]
+        self.API_KEY = config_data["config"]["API_KEY"]
+        self.conversation = [message for message in config_data["config"]["Previous Conversation"]]
 
     # Updates the config file with the sessions messages
     # Takes the API key, chat log, path to the config, and if the function has been called
-    def saveConversation(api_key: str, chat_log: str, path: str):
-        with open(path, 'r+') as config:
+    def saveConversation(self, chat_log):
+        with open(self.path, 'r+') as config:
             data = json.load(config)
-            data["config"]["API_KEY"] = api_key
+            data["config"]["API_KEY"] = self.API_KEY
             data["config"]["Previous Conversation"] = chat_log
             config.seek(0)
             json.dump(data, config)
@@ -127,7 +135,13 @@ def yesNo(question: str):
         yesNo(question)
 
 if __name__ == "__main__":
-    API_KEY, chatLog = configOps.loadConfig(CONFIG_PATH)
+    myConfig = config()
+
+    myConfig.loadConfig(CONFIG_PATH)
+
+    API_KEY, chatLog = myConfig.API_KEY, myConfig.conversation
+
+    print(API_KEY)
 
     if (API_KEY == None or API_KEY == ""):
         raise Exception("Missing API Key")
@@ -168,6 +182,6 @@ if __name__ == "__main__":
             chatLog.append({"role": "assistant", "content": response})
     
     if yesNo("Would you like to save this conversation?"):
-        configOps.saveConversation(API_KEY, chatLog, CONFIG_PATH)
+        myConfig.saveConversation(chatLog)
     else:
-        configOps.saveConversation(API_KEY, [{"role":"developer", "content": OpenAIRequests.DEVMESSAGE}], CONFIG_PATH)
+        myConfig.saveConversation([{"role":"developer", "content": OpenAIRequests.DEVMESSAGE}])
