@@ -1,7 +1,7 @@
 module InSelector(enable, inhibit, zed, ins, addr);
     input enable;
     input inhibit;
-    input addr;
+    input [2:0] addr;
     input [7:0] ins;
 
     output reg zed;

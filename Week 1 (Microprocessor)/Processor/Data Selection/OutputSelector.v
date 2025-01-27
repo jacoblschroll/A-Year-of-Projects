@@ -3,7 +3,7 @@ module OutSelector(rst, data, write, CE, writeDisable, addr, outLatch);
     input data;
     input write;
     input CE;
-    input writeDisable
+    input writeDisable;
     input [2:0] addr;
 
     output reg [7:0] outLatch;
