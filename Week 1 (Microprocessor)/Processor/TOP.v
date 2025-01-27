@@ -4,11 +4,11 @@
 `include "Data Selection/OutputSelector.v"
 `include "Data Selection/InputSelector.v"
 
-module top(clk, rst, data, write, result, moveIn);
+module top #(parameter N = 2) (clk, rst, data, write, result, moveIn);
     input clk, rst, data;
     input [7:0] moveIn;
 
-    wire [1:0] addr;
+    wire [N-1:0] addr;
     wire [7:0] instruction;
 
     wire [7:0] scratch;

@@ -12,7 +12,7 @@ module TOP_tb;
   output result;
 
   // Instantiate the top module
-  top uut (
+  top #(.N(2)) uut (
     .clk(clk),
     .rst(rst),
     .data(data),
