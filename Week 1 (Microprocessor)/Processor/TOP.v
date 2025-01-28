@@ -16,7 +16,7 @@ module top #(parameter N = 2) (clk, rst, data, write, result, moveIn);
 
     output write, result;
 
-    counter #(.N(2)) programCounter (clk, rst, addr);
+    COUNTER #(.N(2)) programCounter (clk, rst, addr);
     ROM #(.N(2)) program (addr, instruction);
     ICU controlUnit(clk, rst, instruction[7:4], data, write, result);
 

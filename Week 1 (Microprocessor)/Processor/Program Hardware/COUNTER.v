@@ -1,4 +1,4 @@
-module counter #(parameter N = 2) (clk, rst, count);
+module COUNTER #(parameter N = 2) (clk, rst, count);
     input clk;
     input rst;
 

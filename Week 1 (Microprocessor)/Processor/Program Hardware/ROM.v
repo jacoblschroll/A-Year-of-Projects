@@ -2,7 +2,7 @@ module ROM #(parameter N = 2) (address, data);
     input [N-1:0] address;
     output [7:0] data;
 
-    reg [7:0] store [0:(2 ** N) - 1]; // Declare a 4-element array of 8-bit registers
+    reg [7:0] store [0:(2 ** N) - 1]; // Declare a 2 ^ N-element array of 8-bit registers
 
     // Initialize the store array
     initial begin
