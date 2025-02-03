@@ -5,3 +5,4 @@ Since I needed a portfolio and wanted a place to show off the ideas I mess aroun
 Currently I have added:
 - Week 0 (Jan 14 - Jan 20): GPT by API
 - Week 1 (Jan 21 - Jan 27): Microprocessor
+- Week 2 (Jan 28 - Feb 4): Edge CNN Accelerator
